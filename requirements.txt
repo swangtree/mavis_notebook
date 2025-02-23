@@ -1,0 +1,6 @@
+numpy
+tqdm
+pillow
+pygame
+jupyter
+ipywidgets 

@@ -1,0 +1,23 @@
+#domain
+hospital
+#levelname
+SAD2
+#colors
+blue: 0, A, B, C, D
+#initial
+++++++++++
++0C      +
++BD   ++++
++        +
++     ++A+
++      + +
+++++++++++
+#goal
+++++++++++
++        +
++     ++++
++        +
++     ++ +
++      +A+
+++++++++++
+#end
