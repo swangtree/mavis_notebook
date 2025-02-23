@@ -94,28 +94,31 @@ class FrontierBestFirst:
 
     def prepare(self, goal_description: h_goal_description.HospitalGoalDescription):
         self.goal_description = goal_description
-        # Prepare is called at the beginning of a search and since we will sometimes reuse frontiers for multiple
-        # searches, prepares must ensure that state is cleared.
-        # Your code here...
-        raise NotImplementedError()
+        self.priority_queue.clear()
 
     def f(self, state: h_state.HospitalState, goal_description: h_goal_description.HospitalGoalDescription) -> int:
         raise Exception("FrontierBestFirst should not be directly used. Instead use a subclass overriding f()")
 
     def add(self, state: h_state.HospitalState):
-        raise NotImplementedError()
+        # print statements commented out to avoid clutter
+        priority = self.f(state, self.goal_description)
+        # print(f"\nAdding state to frontier:")
+        # print(f"State:\n{state}")
+        # print(f"f-value: {priority}")
+        self.priority_queue.add(state, priority)
+        # print(f"Frontier size after adding: {self.size()}")
 
     def pop(self) -> h_state.HospitalState:
-        raise NotImplementedError()
+        return self.priority_queue.pop()
 
     def is_empty(self) -> bool:
-        raise NotImplementedError()
+        return self.priority_queue.size() == 0
 
     def size(self) -> int:
-        raise NotImplementedError()
+        return self.priority_queue.size()
 
     def contains(self, state: h_state.HospitalState) -> bool:
-        raise NotImplementedError()
+        return state in self.priority_queue.entry_finder
 
 
 # The FrontierAStar and FrontierGreedy classes extend the FrontierBestFirst class, that is, they are
@@ -125,17 +128,71 @@ class FrontierAStar(FrontierBestFirst):
     def __init__(self, heuristic):
         super().__init__()
         self.heuristic = heuristic
+        # print("\nInitializing A* Search with heuristic:", type(self.heuristic).__name__)
 
     def f(self, state: h_state.HospitalState, goal_description: h_goal_description.HospitalGoalDescription) -> int:
-        raise NotImplementedError()
+        h_value = self.heuristic.h(state, goal_description)
+        g_value = state.path_cost
+        f_value = h_value + g_value
+        # print(f"\nComputing values for state:\n{state}")
+        # print(f"h-value (heuristic): {h_value}")
+        # print(f"g-value (path cost): {g_value}")
+        # print(f"f-value (h + g): {f_value}")
+        return f_value
+
+    def add(self, state: h_state.HospitalState):
+        # print statements commented out to avoid clutter
+        priority = self.f(state, self.goal_description)
+        # print(f"\nAdding state to frontier:")
+        # print(f"State:\n{state}")
+        # print(f"f-value: {priority}")
+        self.priority_queue.add(state, priority)
+        # print(f"Frontier size after adding: {self.size()}")
+
+    def pop(self) -> h_state.HospitalState:
+        # print statements commented out to avoid clutter
+        state = super().pop()
+        # print("\nPopping state from frontier:")
+        # print(f"State:\n{state}")
+        # print(f"h-value: {self.heuristic.h(state, self.goal_description)}")
+        # print(f"g-value: {state.path_cost}")
+        # print(f"f-value: {self.f(state, self.goal_description)}")
+        # print(f"Remaining frontier size: {self.size()}")
         
+        # Print current frontier contents
+        # print("\nCurrent frontier contents:")
+        # for state in self.priority_queue.entry_finder:
+        #     h_val = self.heuristic.h(state, self.goal_description)
+        #     g_val = state.path_cost
+        #     f_val = h_val + g_val
+        #     print(f"State with f-value {f_val} (h={h_val}, g={g_val}):\n{state}")
+        return state
 
 class FrontierGreedy(FrontierBestFirst):
 
     def __init__(self, heuristic):
         super().__init__()
         self.heuristic = heuristic
+        print("\nInitializing Greedy Best-First Search with heuristic:", type(self.heuristic).__name__)
 
     def f(self, state: h_state.HospitalState, goal_description: h_goal_description.HospitalGoalDescription) -> int:
-        raise NotImplementedError()
+        h_value = self.heuristic.h(state, goal_description)
+        # print(f"Computing h-value for state:\n{state}")
+        # print(f"h-value: {h_value}")
+        return h_value
+
+    def pop(self) -> h_state.HospitalState:
+        # print statements commented out to avoid clutter
+        state = super().pop()
+        # print("\nPopping state from frontier:")
+        # print(f"State:\n{state}")
+        # print(f"h-value: {self.heuristic.h(state, self.goal_description)}")
+        # print(f"Remaining frontier size: {self.size()}")
+        
+        # Print current frontier contents
+        # print("\nCurrent frontier contents:")
+        # for state in self.priority_queue.entry_finder:
+        #     h_val = self.heuristic.h(state, self.goal_description)
+        #     print(f"State with h-value {h_val}:\n{state}")
+        return state
     
