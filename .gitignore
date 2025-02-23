@@ -1,0 +1,14 @@
+# virtual environment
+.venv/
+
+# results
+.results/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# IDE settings
+.vscode/
+.idea/
