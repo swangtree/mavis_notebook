@@ -95,6 +95,8 @@ class FrontierBestFirst:
     def prepare(self, goal_description: h_goal_description.HospitalGoalDescription):
         self.goal_description = goal_description
         self.priority_queue.clear()
+        if hasattr(self, 'heuristic'):  # For A* and Greedy
+            self.heuristic.preprocess(goal_description.level)
 
     def f(self, state: h_state.HospitalState, goal_description: h_goal_description.HospitalGoalDescription) -> int:
         raise Exception("FrontierBestFirst should not be directly used. Instead use a subclass overriding f()")

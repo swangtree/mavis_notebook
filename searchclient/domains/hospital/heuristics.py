@@ -38,21 +38,25 @@ class HospitalZeroHeuristic:
     
 
 class HospitalGoalCountHeuristics:
-
     def __init__(self):
-        raise NotImplementedError()
-
+        pass
 
     def preprocess(self, level: h_level.HospitalLevel):
-        # This function will be called a single time prior 
-        # to the search allowing us to preprocess the level such as
-        # pre-computing lookup tables or other acceleration structures
-       raise NotImplementedError()
+        self.goal_count = len(level.box_goals + level.agent_goals)
     
     def h(self, state: h_state.HospitalState, 
                 goal_description: h_goal_description.HospitalGoalDescription) -> int:
-        # your code here...
-        raise NotImplementedError()
+        
+        objects_in_goals = 0
+        
+        for (goal_position, goal_char, is_positive_literal) in goal_description.goals:
+            char = state.object_at(goal_position)
+            if is_positive_literal and goal_char == char:
+                objects_in_goals += 1
+            elif not is_positive_literal and goal_char != char:
+                objects_in_goals += 1
+
+        return self.goal_count - objects_in_goals
 
 class HospitalAdvancedHeuristics:
 
