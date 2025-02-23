@@ -12,3 +12,8 @@ __pycache__/
 # IDE settings
 .vscode/
 .idea/
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
