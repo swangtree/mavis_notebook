@@ -17,3 +17,17 @@ __pycache__/
 __pycache__/
 *.py[cod]
 *$py.class
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/*
+
+# Notebook output
+**/*.ipynb
+!**/*.ipynb
+**/.ipynb_checkpoints/
+**/*_files/
+**/*.html
+
+# Clear notebook outputs
+*.ipynb filter=strip-notebook-output
