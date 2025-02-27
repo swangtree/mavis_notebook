@@ -25,7 +25,7 @@ import domains.hospital.goal_description as goal_description
 import strategies.bfs as bfs
 
 from domains.hospital.actions import MoveAction
-
+from domains.hospital.heuristics import HospitalAdvancedHeuristics as heuristic
 
 # Note: This syntax below (<variable name>: <variable type>) is type hinting and is meant
 # to make it easier for you to understand (now you know that `action_set` is a list of lists of
@@ -74,10 +74,15 @@ def graph_search(
     frontier.add(initial_state)
     
     expandedNodes = set()
+    heuristicValues = {}
     
     while not frontier.is_empty():
         node = frontier.pop()  # First node is popped from the frontier
         iterations += 1 
+
+        # Print the current state and frontier
+        print(f"Current state: {node}")
+        print(f"Frontier: {[str(state) for state in frontier]}")
 
         if goal_description.is_goal(node):
             elapsed_time = time.time() - start_time  # Compute elapsed time
@@ -89,7 +94,16 @@ def graph_search(
             child = node.result(action) 
 
             if child not in expandedNodes and not frontier.contains(child):
+                g = node.path_cost + 1
+                h = heuristic.h(child, goal_description)
+                f = g + h
+                
+                print(f"f(child): {f}, g(child): {g}, h(child): {h}")
+
+                heuristicValues[child] = (f, g, h) #Storing heuristic values
                 frontier.add(child)  # Add child to the frontier
+
+        print_search_status(expandedNodes, heuristicValues, frontier)
 
     elapsed_time = time.time() - start_time  # Compute elapsed time
     return False, [], iterations, elapsed_time  # Return failure if no solution is found
@@ -98,7 +112,7 @@ def graph_search(
 start_time = 0
 
 
-def print_search_status(expanded, frontier, print_search_meta_data=True):
+def print_search_status(expanded, frontier, heuristicValues, print_search_meta_data=True):
     global start_time
     
     if len(expanded) == 0:
@@ -112,8 +126,14 @@ def print_search_status(expanded, frontier, print_search_meta_data=True):
     num_generated = f"{len(expanded) + frontier.size():8,d}".replace(',', '.')
     elapsed_time = f"{time.time() - start_time:3.3f}".replace('.', ',')
     memory_usage_mb = f"{memory_usage_bytes / (1024*1024):3.2f}".replace('.', ',')
+    
+    # Include f, g, and h values in the status text
+    fgh_text = ""
+    for state, (f, g, h) in heuristicValues.items():
+        fgh_text += f"State: {state}, f: {f}, g: {g}, h: {h}\n"
+    
     status_text = f"#Expanded: {num_expanded}, #Frontier: {num_frontier}, #Generated: {num_generated}," \
-                  f" Time: {elapsed_time} s, Memory: {memory_usage_mb} MB\n\n"
+                  f" Time: {elapsed_time} s, Memory: {memory_usage_mb} MB\n\n{fgh_text}"
     
     if print_search_meta_data:
         print(status_text, file=sys.stderr)
