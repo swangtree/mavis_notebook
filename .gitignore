@@ -30,4 +30,3 @@ __pycache__/
 **/*.html
 
 # Clear notebook outputs
-*.ipynb filter=strip-notebook-output

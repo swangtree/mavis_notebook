@@ -61,13 +61,36 @@ class HospitalGoalCountHeuristics:
 class HospitalAdvancedHeuristics:
 
     def __init__(self):
-        raise NotImplementedError()
+        self.goal_positions = []
 
     def preprocess(self, level: h_level.HospitalLevel):
         # This function will be called a single time prior to the search allowing us to preprocess the level such as
         # pre-computing lookup tables or other acceleration structures
-        raise NotImplementedError()
+        self.goal_positions = level.box_goals + level.agent_goals
 
     def h(self, state: h_state.HospitalState, goal_description: h_goal_description.HospitalGoalDescription) -> int:
         # your heuristic goes here...      
-        raise NotImplementedError()
+        totalDistance = 0
+
+        for goalPosition, goalChar, isPositiveLiteral in goal_description.goals:
+            char = state.object_at(goalPosition)
+            if isPositiveLiteral and goalChar == char:
+                continue
+            elif not isPositiveLiteral and goalChar != char:
+                continue
+            
+            #Calculating Manhattan distance
+            for boxPosition in state.box_positions:
+                if state.box_at(boxPosition) == goalChar:
+                    distance = abs(boxPosition[0] - goalPosition[0]) + abs(boxPosition[1] - goalPosition[1])
+                    totalDistance += distance
+                    break
+
+            for agentPosition in state.agent_positions:
+                if state.agent_at(agentPosition) == goalChar:
+                    distance = abs(agentPosition[0] - goalPosition[0]) + abs(agentPosition[1] - goalPosition[1])
+                    totalDistance += distance
+                    break
+
+        print(f"h(state): {totalDistance}")   
+        return totalDistance
