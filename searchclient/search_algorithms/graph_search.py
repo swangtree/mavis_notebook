@@ -82,7 +82,7 @@ def graph_search(
 
         # Print the current state and frontier
         print(f"Current state: {node}")
-        print(f"Frontier: {[str(state) for state in frontier]}")
+        print(f"Frontier size: {frontier.size()}")
 
         if goal_description.is_goal(node):
             elapsed_time = time.time() - start_time  # Compute elapsed time
@@ -95,15 +95,21 @@ def graph_search(
 
             if child not in expandedNodes and not frontier.contains(child):
                 g = node.path_cost + 1
-                h = heuristic.h(child, goal_description)
-                f = g + h
                 
-                print(f"f(child): {f}, g(child): {g}, h(child): {h}")
-
-                heuristicValues[child] = (f, g, h) #Storing heuristic values
+                # for informed search frontiers, get the heuristic value
+                if hasattr(frontier, 'heuristic'):
+                    h = frontier.heuristic.h(child, goal_description)
+                    f = g + h
+                    print(f"f(child): {f}, g(child): {g}, h(child): {h}")
+                    heuristicValues[child] = (f, g, h) #Storing heuristic values
+                else:
+                    #for uninformed search, we don't need heuristic values
+                    print(f"g(child): {g}")
+                    heuristicValues[child] = (g, g, 0)
+                
                 frontier.add(child)  # Add child to the frontier
 
-        print_search_status(expandedNodes, heuristicValues, frontier)
+        print_search_status(expandedNodes, frontier, heuristicValues)
 
     elapsed_time = time.time() - start_time  # Compute elapsed time
     return False, [], iterations, elapsed_time  # Return failure if no solution is found
