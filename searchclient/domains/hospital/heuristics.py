@@ -61,36 +61,28 @@ class HospitalGoalCountHeuristics:
 class HospitalAdvancedHeuristics:
 
     def __init__(self):
-        self.goal_positions = []
+        pass
 
     def preprocess(self, level: h_level.HospitalLevel):
         # This function will be called a single time prior to the search allowing us to preprocess the level such as
         # pre-computing lookup tables or other acceleration structures
-        self.goal_positions = level.box_goals + level.agent_goals
+        self.goal_dict = {}
+        for (goal_position, goal_letter, is_positive_literal) in level.box_goals + level.agent_goals:
+            self.goal_dict[goal_letter] = (goal_position, is_positive_literal)
+        print(f"goal_dict: {self.goal_dict}")
 
     def h(self, state: h_state.HospitalState, goal_description: h_goal_description.HospitalGoalDescription) -> int:
-        # your heuristic goes here...      
         totalDistance = 0
 
-        for goalPosition, goalChar, isPositiveLiteral in goal_description.goals:
-            char = state.object_at(goalPosition)
-            if isPositiveLiteral and goalChar == char:
-                continue
-            elif not isPositiveLiteral and goalChar != char:
-                continue
-            
-            #Calculating Manhattan distance
-            for boxPosition in state.box_positions:
-                if state.box_at(boxPosition) == goalChar:
-                    distance = abs(boxPosition[0] - goalPosition[0]) + abs(boxPosition[1] - goalPosition[1])
-                    totalDistance += distance
-                    break
+        for (agentPosition, agentChar) in state.agent_positions:
+            if agentChar in self.goal_dict:
+                goalPosition, is_positive_literal = self.goal_dict[agentChar]
+                if is_positive_literal and agentChar == state.object_at(goalPosition):
+                    continue
+                else:
+                    totalDistance += abs(agentPosition[0] - goalPosition[0]) + abs(agentPosition[1] - goalPosition[1])
+            else:
+                print(f"DEBUG: Agent {agentChar} not in goal_dict")
 
-            for agentPosition in state.agent_positions:
-                if state.agent_at(agentPosition) == goalChar:
-                    distance = abs(agentPosition[0] - goalPosition[0]) + abs(agentPosition[1] - goalPosition[1])
-                    totalDistance += distance
-                    break
-
-        print(f"h(state): {totalDistance}")   
-        return totalDistance
+        print(f"h(state): {totalDistance}, normalized distance: {totalDistance/len(self.goal_dict)}")   
+        return totalDistance/len(self.goal_dict)
