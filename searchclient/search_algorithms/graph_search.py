@@ -81,7 +81,7 @@ def graph_search(
         iterations += 1 
 
         # Print the current state and frontier
-        print(f"Current state: {node}")
+        print(f"Current state: \n{node}")
         print(f"Frontier size: {frontier.size()}")
 
         if goal_description.is_goal(node):
