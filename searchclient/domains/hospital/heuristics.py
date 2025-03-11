@@ -69,7 +69,7 @@ class HospitalAdvancedHeuristics:
         self.goal_dict = {}
         for (goal_position, goal_letter, is_positive_literal) in level.box_goals + level.agent_goals:
             self.goal_dict[goal_letter] = (goal_position, is_positive_literal)
-        print(f"goal_dict: {self.goal_dict}")
+        #print(f"goal_dict: {self.goal_dict}")
 
     def h(self, state: h_state.HospitalState, goal_description: h_goal_description.HospitalGoalDescription) -> int:
         totalDistance = 0
@@ -81,8 +81,8 @@ class HospitalAdvancedHeuristics:
                     continue
                 else:
                     totalDistance += abs(agentPosition[0] - goalPosition[0]) + abs(agentPosition[1] - goalPosition[1])
-            else:
-                print(f"DEBUG: Agent {agentChar} not in goal_dict")
+            #else:
+                #print(f"DEBUG: Agent {agentChar} not in goal_dict")
 
-        print(f"h(state): {totalDistance}, normalized distance: {totalDistance/len(self.goal_dict)}")   
+        #print(f"h(state): {totalDistance}, normalized distance: {totalDistance/len(self.goal_dict)}")   
         return totalDistance/len(self.goal_dict)
