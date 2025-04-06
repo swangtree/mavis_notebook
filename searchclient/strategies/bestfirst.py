@@ -104,11 +104,13 @@ class FrontierBestFirst:
     def add(self, state: h_state.HospitalState):
         # print statements commented out to avoid clutter
         priority = self.f(state, self.goal_description)
-        # print(f"\nAdding state to frontier:")
-        # print(f"State:\n{state}")
-        # print(f"f-value: {priority}")
+        if self.verbose:
+            print(f"\nAdding state to frontier:")
+            print(f"State:\n{state}")
+            print(f"f-value: {priority}")
         self.priority_queue.add(state, priority)
-        # print(f"Frontier size after adding: {self.size()}")
+        if self.verbose:
+            print(f"Frontier size after adding: {self.size()}")
 
     def pop(self) -> h_state.HospitalState:
         return self.priority_queue.pop()
