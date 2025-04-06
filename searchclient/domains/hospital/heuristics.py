@@ -72,17 +72,29 @@ class HospitalAdvancedHeuristics:
         #print(f"goal_dict: {self.goal_dict}")
 
     def h(self, state: h_state.HospitalState, goal_description: h_goal_description.HospitalGoalDescription) -> int:
-        totalDistance = 0
+        total_distance = 0
 
-        for (agentPosition, agentChar) in state.agent_positions:
-            if agentChar in self.goal_dict:
-                goalPosition, is_positive_literal = self.goal_dict[agentChar]
-                if is_positive_literal and agentChar == state.object_at(goalPosition):
+        #calculate agent distances from goals
+        for (agent_position, agent_char) in state.agent_positions:
+            if agent_char in self.goal_dict:
+                goal_position, is_positive_literal = self.goal_dict[agent_char]
+                if is_positive_literal and agent_char == state.object_at(goal_position):
                     continue
                 else:
-                    totalDistance += abs(agentPosition[0] - goalPosition[0]) + abs(agentPosition[1] - goalPosition[1])
+                    total_distance += abs(agent_position[0] - goal_position[0]) + abs(agent_position[1] - goal_position[1])
             #else:
-                #print(f"DEBUG: Agent {agentChar} not in goal_dict")
+                #print(f"DEBUG: Agent {agent_char} not in goal_dict")
 
-        #print(f"h(state): {totalDistance}, normalized distance: {totalDistance/len(self.goal_dict)}")   
-        return totalDistance/len(self.goal_dict)
+        #calculate distances from boxes to their goals
+        for (box_position, box_char) in state.box_positions:
+            if box_char in self.goal_dict:
+                goal_position, is_positive_literal = self.goal_dict[box_char]
+                if is_positive_literal and box_char == state.object_at(goal_position):
+                    continue
+                else:
+                    total_distance += abs(box_position[0] - goal_position[0]) + abs(box_position[1] - goal_position[1])
+            #else:
+                #print(f"DEBUG: Box {box_char} not in goal_dict")
+
+        #print(f"h(state): {total_distance}, normalized distance: {total_distance/len(self.goal_dict)}")   
+        return total_distance/len(self.goal_dict)
