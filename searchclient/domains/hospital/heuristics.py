@@ -66,35 +66,54 @@ class HospitalAdvancedHeuristics:
     def preprocess(self, level: h_level.HospitalLevel):
         # This function will be called a single time prior to the search allowing us to preprocess the level such as
         # pre-computing lookup tables or other acceleration structures
-        self.goal_dict = {}
+        self.goal_map = defaultdict(list)
+        self.total_goal_count = 0
         for (goal_position, goal_letter, is_positive_literal) in level.box_goals + level.agent_goals:
-            self.goal_dict[goal_letter] = (goal_position, is_positive_literal)
-        #print(f"goal_dict: {self.goal_dict}")
+            self.goal_map[goal_letter].append((goal_position, is_positive_literal))
+            self.total_goal_count += 1
 
     def h(self, state: h_state.HospitalState, goal_description: h_goal_description.HospitalGoalDescription) -> int:
         total_distance = 0
 
-        #calculate agent distances from goals
-        for (agent_position, agent_char) in state.agent_positions:
-            if agent_char in self.goal_dict:
-                goal_position, is_positive_literal = self.goal_dict[agent_char]
-                if is_positive_literal and agent_char == state.object_at(goal_position):
-                    continue
-                else:
-                    total_distance += abs(agent_position[0] - goal_position[0]) + abs(agent_position[1] - goal_position[1])
-            #else:
-                #print(f"DEBUG: Agent {agent_char} not in goal_dict")
+        #calculate agent distances to their closest respective unmet goals
+        for agent_pos, agent_char in state.agent_positions:
+            if agent_char in self.goal_map:
+                min_dist_for_agent = float('inf')
+                found_unmet_goal = False
+                for goal_pos, is_positive in self.goal_map[agent_char]:
+                    #check if this specific goal is met
+                    current_char_at_goal = state.object_at(goal_pos)
+                    goal_is_met = (is_positive and current_char_at_goal == agent_char) or \
+                                  (not is_positive and current_char_at_goal != agent_char)
+                    
+                    if not goal_is_met:
+                        found_unmet_goal = True
+                        distance = abs(agent_pos[0] - goal_pos[0]) + abs(agent_pos[1] - goal_pos[1])
+                        min_dist_for_agent = min(min_dist_for_agent, distance)
+                
+                if found_unmet_goal:
+                    total_distance += min_dist_for_agent
 
-        #calculate distances from boxes to their goals
-        for (box_position, box_char) in state.box_positions:
-            if box_char in self.goal_dict:
-                goal_position, is_positive_literal = self.goal_dict[box_char]
-                if is_positive_literal and box_char == state.object_at(goal_position):
-                    continue
-                else:
-                    total_distance += abs(box_position[0] - goal_position[0]) + abs(box_position[1] - goal_position[1])
-            #else:
-                #print(f"DEBUG: Box {box_char} not in goal_dict")
+        #calculate box distances to their closest respective unmet goals
+        for box_pos, box_char in state.box_positions:
+             if box_char in self.goal_map:
+                min_dist_for_box = float('inf')
+                found_unmet_goal = False
+                for goal_pos, is_positive in self.goal_map[box_char]:
+                    #check if this specific goal is met
+                    current_char_at_goal = state.object_at(goal_pos)
+                    goal_is_met = (is_positive and current_char_at_goal == box_char) or \
+                                  (not is_positive and current_char_at_goal != box_char)
 
-        #print(f"h(state): {total_distance}, normalized distance: {total_distance/len(self.goal_dict)}")   
-        return total_distance/len(self.goal_dict)
+                    if not goal_is_met:
+                        found_unmet_goal = True
+                        distance = abs(box_pos[0] - goal_pos[0]) + abs(box_pos[1] - goal_pos[1])
+                        min_dist_for_box = min(min_dist_for_box, distance)
+
+                if found_unmet_goal:
+                    total_distance += min_dist_for_box
+
+        if self.total_goal_count == 0:
+            return 0
+        #normalize distance by total number of goals
+        return int(total_distance / self.total_goal_count)
